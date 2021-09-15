@@ -14,44 +14,34 @@ const getUser = (req, res, next) => {
     .then((user) => {
       res.status(200).send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequestError('Переданы некорректные данные');
-      }
-      next(err);
-    });
+    .catch(next);
 };
 
 const createUser = (req, res, next) => {
   const {
     name, email, password,
   } = req.body;
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        throw new ConflictError('Пользователь с таким email уже существует');
-      } bcrypt.hash(password, 10)
-        .then((hash) => User.create({
-          name,
-          email,
-          password: hash,
-        }))
-        .then((newuser) => {
-          res.send({
-            name: newuser.name,
-            email: newuser.email,
-          });
-        })
-        .catch((err) => {
-          if (err.name === 'MongoError' && err.code === 11000) {
-            throw new ConflictError('Такой e-mail уже зарегистрирован');
-          } else if (err.name === 'ValidationError') {
-            throw new BadRequestError('Переданы некорректные данные');
-          }
-          next(err);
-        });
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      email,
+      password: hash,
+      name,
+    }))
+    .then((newuser) => {
+      res.send({
+        email: newuser.email,
+        name: newuser.name,
+      });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Такой e-mail уже зарегистрирован'));
+      } else {
+        next(new Error('Ошибка на сервере'));
+      }
+    });
 };
 
 const updateUser = (req, res, next) => {
@@ -60,7 +50,7 @@ const updateUser = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { name, about },
-    { new: true, runValidators: true },
+    { new: false, runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -96,10 +86,7 @@ const login = (req, res, next) => {
         secure: true,
       }).status(200).send({ token });
     })
-    .catch(() => {
-      throw new UnauthorizedError('Неверные почта или пароль');
-    })
-    .catch(next);
+    .catch(() => next(new UnauthorizedError('Неверные почта или пароль')));
 };
 
 const logout = (req, res) => {
