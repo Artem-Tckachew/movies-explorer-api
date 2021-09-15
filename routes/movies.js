@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-const isURL = require('validator');
+const { isURL } = require('validator');
 const {
   getMovies,
   createMovie,
