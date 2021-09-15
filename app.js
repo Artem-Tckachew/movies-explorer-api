@@ -5,18 +5,13 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
+const limiter = require('./middlewares/limiter');
 const serverError = require('./middlewares/serverError');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-});
 
 app.use(requestLogger);
 app.use(limiter);
