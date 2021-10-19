@@ -29,7 +29,7 @@ const MovieValidation = celebrate({
     director: Joi.string().min(2).max(30).required(),
     duration: Joi.number().required(),
     year: Joi.string().min(4).max(4).required(),
-    description: Joi.string().min(2).max(150).required(),
+    description: Joi.string().required(),
     image: Joi.string().required().custom((value) => {
       if (!isURL(value)) {
         throw new Error('Ссылка некоректная');
@@ -48,7 +48,7 @@ const MovieValidation = celebrate({
       }
       return value;
     }),
-    movieId: Joi.number().required(),
+    movieId: Joi.number().integer().required(),
     nameRU: Joi.string().min(2).max(30).required(),
     nameEN: Joi.string().min(2).max(30).required(),
   }),
@@ -56,9 +56,10 @@ const MovieValidation = celebrate({
 
 const MovieIdValidation = celebrate({
   params: Joi.object().keys({
-    movieId: Joi.number(),
+    _id: Joi.string().required().hex().length(24),
   }),
 });
+
 
 module.exports = {
   loginValidate,

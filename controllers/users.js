@@ -45,12 +45,12 @@ const createUser = (req, res, next) => {
 };
 
 const updateUser = (req, res, next) => {
-  const { name, about } = req.body;
+  const { name, email } = req.body;
 
   User.findByIdAndUpdate(
     req.user._id,
-    { name, about },
-    { new: false, runValidators: true },
+    { name, email },
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -90,11 +90,7 @@ const login = (req, res, next) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie('jwt', {
-    httpOnly: true,
-    sameSite: 'none',
-    secure: true,
-  }).status(200).end();
+  res.clearCookie('jwt').send({ message: messages.cookiesDeleted });
 };
 
 module.exports = {

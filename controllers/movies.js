@@ -4,7 +4,8 @@ const BadRequestError = require('../errors/BadRequestError');
 const AuthError = require('../errors/AuthError');
 
 const getMovies = (req, res, next) => {
-  Movie.find({})
+  const owner = req.user._id;
+  Movie.find({ owner })
     .then((movies) => {
       res.status(200).send(movies);
     })
@@ -12,7 +13,6 @@ const getMovies = (req, res, next) => {
 };
 
 const createMovie = (req, res, next) => {
-  const owner = req.user._id;
   const {
     country, director, duration, year, description, image,
     trailer, nameRU, nameEN, thumbnail, movieId,
@@ -29,10 +29,10 @@ const createMovie = (req, res, next) => {
     nameEN,
     thumbnail,
     movieId,
-    owner,
+    owner: req.user._id,
   })
-    .then((movie) => {
-      res.status(200).send(movie);
+    .then((newMovie) => {
+      res.status(200).send(newMovie);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -45,11 +45,12 @@ const createMovie = (req, res, next) => {
 };
 
 const deleteMovie = (req, res, next) => {
-  Movie.findById(req.params.movieId)
+  const id = req.user._id;
+  Movie.findById(req.params._id)
     .then((movie) => {
       if (!movie) {
         throw new NotFoundError('Нет фильма c таким id');
-      } else if (movie.owner.toString() !== req.user._id) {
+      } else if (movie.owner.toString() !== id) {
         next(new AuthError('Недостаточно прав для удаления данного фильма'));
       }
       return Movie.findByIdAndRemove(req.params.movieId)
