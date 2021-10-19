@@ -23,12 +23,18 @@ const userValidate = celebrate({
   }),
 });
 
+const MovieIdValidation = celebrate({
+  params: Joi.object().keys({
+    _id: Joi.string().required().hex().length(24),
+  }),
+});
+
 const MovieValidation = celebrate({
   body: Joi.object().keys({
-    country: Joi.string().min(2).max(30).required(),
-    director: Joi.string().min(2).max(30).required(),
+    country: Joi.string().required(),
+    director: Joi.string().required(),
     duration: Joi.number().required(),
-    year: Joi.string().min(4).max(4).required(),
+    year: Joi.string().required(),
     description: Joi.string().required(),
     image: Joi.string().required().custom((value) => {
       if (!isURL(value)) {
@@ -51,12 +57,6 @@ const MovieValidation = celebrate({
     movieId: Joi.number().integer().required(),
     nameRU: Joi.string().min(2).max(30).required(),
     nameEN: Joi.string().min(2).max(30).required(),
-  }),
-});
-
-const MovieIdValidation = celebrate({
-  params: Joi.object().keys({
-    _id: Joi.string().required().hex().length(24),
   }),
 });
 

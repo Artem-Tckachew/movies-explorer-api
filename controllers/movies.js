@@ -53,14 +53,12 @@ const deleteMovie = (req, res, next) => {
       } else if (movie.owner.toString() !== id) {
         next(new AuthError('Недостаточно прав для удаления данного фильма'));
       }
-      return Movie.findByIdAndRemove(req.params.movieId)
-        .then((movieDel) => {
-          res.status(200).send(movieDel);
+      return movie.remove()
+          .then((deletedMovie) => res.send(deletedMovie))
+          .catch(next);
         })
         .catch(next);
-    })
-    .catch(next);
-};
+    }
 
 module.exports = {
   getMovies,
