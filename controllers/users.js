@@ -90,7 +90,11 @@ const login = (req, res, next) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie('jwt').send({ message: messages.cookiesDeleted });
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+  }).status(200).end();
 };
 
 module.exports = {
