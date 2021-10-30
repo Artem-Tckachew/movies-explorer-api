@@ -19,29 +19,34 @@ const getUser = (req, res, next) => {
 
 const createUser = (req, res, next) => {
   const {
-    name, email, password,
+    name,
+    email,
+    password,
   } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      email,
-      password: hash,
-      name,
-    }))
-    .then((newuser) => {
-      res.send({
-        email: newuser.email,
-        name: newuser.name,
-      });
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        throw new ConflictError('Пользователь с таким email уже существует');
+      } bcrypt.hash(password, 10)
+        .then((hash) => User.create({
+          name,
+          email,
+          password: hash,
+        }))
+        .then((user2) => {
+          res.send({
+            name: user2.name,
+            email: user2.email,
+          });
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            next(new BadRequestError('Переданны некорректные данные'));
+          }
+          next(err);
+        });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные'));
-      } else if (err.code === 11000) {
-        next(new ConflictError('Такой e-mail уже зарегистрирован'));
-      } else {
-        next(new Error('Ошибка на сервере'));
-      }
-    });
+    .catch(next);
 };
 
 const updateUser = (req, res, next) => {
