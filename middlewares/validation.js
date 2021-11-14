@@ -55,8 +55,8 @@ const MovieValidation = celebrate({
       return value;
     }),
     movieId: Joi.number().integer().required(),
-    nameRU: Joi.string().min(2).max(30).required(),
-    nameEN: Joi.string().min(2).max(30).required(),
+    nameRU: Joi.string().required(),
+    nameEN: Joi.string().required(),
   }),
 });
 
